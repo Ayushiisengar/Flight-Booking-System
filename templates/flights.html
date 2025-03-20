@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Available Flights</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<style>
+    body {
+        background-image: url('https://www.shutterstock.com/image-vector/top-aerial-view-airport-terminal-600nw-1700596009.jpg'); /* Replace with an airport-themed image */
+        background-size: cover;
+        background-position: center;
+        color: white;
+    }
+    .container {
+        background-color: rgba(0, 0, 0, 0.75);
+        padding: 40px;
+        border-radius: 10px;
+        margin-top: 50px;
+    }
+    h1 {
+        text-align: center;
+        font-size: 3rem;
+        margin-bottom: 30px;
+    }
+    .btn-custom {
+        background-color: #007bff;
+        border-color: #007bff;
+        font-size: 1.1rem;
+        padding: 10px 20px;
+        border-radius: 5px;
+    }
+    .btn-custom:hover {
+        background-color: #0056b3;
+        border-color: #004080;
+    }
+    table {
+        background-color: white;
+        color: black;
+    }
+</style>
+<body>
+    <div class="container mt-5">
+        <h1>Available Flights</h1>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Flight Number</th>
+                    <th>Departure City</th>
+                    <th>Destination City</th>
+                    <th>Departure Time</th>
+                    <th>Arrival Time</th>
+                    <th>Available Seats</th>
+                </tr>
+            </thead>
+            <tbody id="flightsTableBody">
+                {% for flight in flights %}
+                <tr id="flight-row-{{ flight.flight_number }}">
+                    <td>{{ flight.flight_number }}</td>
+                    <td>{{ flight.departure_city }}</td>
+                    <td>{{ flight.destination_city }}</td>
+                    <td>{{ flight.departure_time }}</td>
+                    <td>{{ flight.arrival_time }}</td>
+                    <td id="available-seats-{{ flight.flight_number }}">{{ flight.available_seats }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <h3>Book a Flight</h3>
+        <form id="bookingForm" onsubmit="bookFlight(event)">
+            <div class="mb-3">
+                <label for="flight_number" class="form-label">Flight Number</label>
+                <input type="text" class="form-control" id="flight_number" required>
+            </div>
+            <div class="mb-3">
+                <label for="num_seats" class="form-label">Number of Seats</label>
+                <input type="number" class="form-control" id="num_seats" min="1" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Book Flight</button>
+        </form>
+    </div>
+
+    <script>
+        function bookFlight(event) {
+            event.preventDefault();
+            const flightData = {
+                flight_number: document.getElementById('flight_number').value,
+                num_seats: document.getElementById('num_seats').value
+            };
+
+            axios.post('/book-flight', flightData)
+                .then(response => {
+                    alert(response.data.message);
+
+                    // Update the available seats dynamically
+                    const flightNumber = flightData.flight_number;
+                    const updatedSeats = response.data.updated_seats;
+                    document.getElementById(`available-seats-${flightNumber}`).innerText = updatedSeats;
+                })
+                .catch(error => {
+                    alert(error.response.data.message);
+                });
+        }
+    </script>
+</body>
+</html>
